@@ -1,0 +1,7 @@
+{
+  "name": "talos",
+  "sdk": "python",
+  "dependencies": [
+    "github.com/shykes/daggerverse/wolfi@f7fe7ace80ebf83a3e5baad918844206022742e6"
+  ]
+}
