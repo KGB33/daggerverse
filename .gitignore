@@ -1,6 +1,6 @@
 .envrc
 .direnv/
 
-sdk/
-
 .venv/
+sdk/
+/sdk
