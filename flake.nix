@@ -11,19 +11,21 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, dagger, ... }:
-    flake-utils.lib.eachDefaultSystem ( system:
-    let
-      pkgs = import nixpkgs {
-        inherit system;
-      };
-    in
-    {
-      devShells.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          dagger.packages.${system}.dagger
-          black
-        ];
-      };
-    }
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+        };
+        dagger' = dagger.packages.${system}.dagger;
+      in
+      {
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs; [
+            dagger'
+            ruff
+            python313
+          ];
+        };
+      }
     );
 }
