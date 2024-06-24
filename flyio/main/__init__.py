@@ -28,7 +28,9 @@ class Flyio:
         return (
             dag.container()
             .from_("alpine")
+            .with_exec(["apk", "add", "jq"])
             .with_file("/usr/bin/flyctl", self.flyctl())
+            .with_file("/usr/bin/fly", self.flyctl())
             .with_exec(["mkdir", "/fly"])
             .with_workdir("/fly")
             .with_secret_variable("FLY_API_TOKEN", self._token)
