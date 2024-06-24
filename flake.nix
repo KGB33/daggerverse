@@ -23,7 +23,7 @@
           buildInputs = with pkgs; [
             dagger'
             ruff
-            python313
+            python312
           ];
         };
       }
