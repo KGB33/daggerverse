@@ -72,7 +72,7 @@ class Flyio:
     @function
     async def cert_check(self, domain: str) -> str:
         """
-        Returns a json string from `fly cert check`.
+        Returns a json string from `fly certs check`.
         """
         return await (
             self.base()
@@ -80,7 +80,7 @@ class Flyio:
                 [
                     "sh",
                     "-c",
-                    f"fly cert check {domain}"
+                    f"fly certs check {domain}"
                     + f"| jq -R -s 'capture({JQ_JSON_CAPTURE}) | .json | fromjson'",
                 ]
             )
