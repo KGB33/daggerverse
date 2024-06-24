@@ -11,6 +11,7 @@ JQ_JSON_CAPTURE = r"(?<json>{(.|\n)*})"
 @object_type
 class Flyio:
     fly_api_token: dagger.Secret | None = None
+    fly_toml: dagger.File | None = None
 
     @property
     def _token(self) -> dagger.Secret:
@@ -19,6 +20,14 @@ class Flyio:
                 "'--fly-api-token' is not set, cannot preform actions that need authentication."
             )
         return self.fly_api_token
+
+    @property
+    def _toml(self) -> dagger.File:
+        if self.fly_toml is None:
+            raise ValueError(
+                "'--fly-toml' is not set, cannot preform actions that need authentication."
+            )
+        return self.fly_toml
 
     @function
     def base(self) -> dagger.Container:
@@ -34,21 +43,20 @@ class Flyio:
             .with_exec(["mkdir", "/fly"])
             .with_workdir("/fly")
             .with_secret_variable("FLY_API_TOKEN", self._token)
+            .with_file("/fly/fly.toml", self._toml)
         )
 
     @function
-    async def deploy(self, fly_toml: dagger.File) -> str:
+    async def deploy(self) -> str:
         """
         deployes the provided fly.toml.
         """
         return await (
             self.base()
-            .with_file("/fly/fly.toml", fly_toml)
             .with_exec(
                 [
                     "flyctl",
                     "deploy",
-                    "--copy-config",
                     "--auto-confirm",
                     "--ha=false",
                     "--now",
@@ -80,8 +88,8 @@ class Flyio:
                 [
                     "sh",
                     "-c",
-                    f"fly certs check {domain}"
-                    + f"| jq -R -s 'capture({JQ_JSON_CAPTURE}) | .json | fromjson'",
+                    f"fly certs check {domain} --json"
+                    + f"| jq -R -s 'capture(\"{JQ_JSON_CAPTURE}\") | .json | fromjson'",
                 ]
             )
             .stdout()
