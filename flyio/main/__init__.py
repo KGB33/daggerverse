@@ -5,6 +5,8 @@ A generated module for Flyio functions.
 import dagger
 from dagger import dag, function, object_type
 
+JQ_JSON_CAPTURE = r"(?<json>{(.|\n)*})"
+
 
 @object_type
 class Flyio:
@@ -19,7 +21,7 @@ class Flyio:
         return self.fly_api_token
 
     @function
-    async def base(self) -> dagger.Container:
+    def base(self) -> dagger.Container:
         """
         A simple container with the FLY_API_TOKEN environment variable set and 'flyctl' installed.
         """
@@ -29,7 +31,7 @@ class Flyio:
             .with_file("/usr/bin/flyctl", self.flyctl())
             .with_exec(["mkdir", "/fly"])
             .with_workdir("/fly")
-            .with_env_variable("FLY_API_TOKEN", await self._token.plaintext())
+            .with_secret_variable("FLY_API_TOKEN", self._token)
         )
 
     @function
@@ -38,7 +40,7 @@ class Flyio:
         Launches the provided fly.toml.
         """
         return await (
-            (await self.base())
+            self.base()
             .with_file("/fly/fly.toml", fly_toml)
             .with_exec(
                 [
@@ -48,6 +50,36 @@ class Flyio:
                     "--auto-confirm",
                     "--ha=false",
                     "--now",
+                ]
+            )
+            .stdout()
+        )
+
+    @function
+    async def cert_add(self, domain: str) -> str:
+        """
+        Adds a fly cert for the provided domain, then
+        returns a json string to verify the cert.
+        """
+        try:
+            _ = self.base().with_exec(["fly", "certs", "add", domain])
+        except dagger.DaggerError:
+            pass  # The cert already exists
+        return await self.cert_check(domain)
+
+    @function
+    async def cert_check(self, domain: str) -> str:
+        """
+        Returns a json string from `fly cert check`.
+        """
+        return await (
+            self.base()
+            .with_exec(
+                [
+                    "sh",
+                    "-c",
+                    f"fly cert check {domain}"
+                    + f"| jq -R -s 'capture({JQ_JSON_CAPTURE}) | .json | fromjson'",
                 ]
             )
             .stdout()
