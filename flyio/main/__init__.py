@@ -96,6 +96,13 @@ class Flyio:
         )
 
     @function
+    async def ip_list(self) -> str:
+        """
+        Returns a json string with the provided IP addresses.
+        """
+        return await self.base().with_exec(["fly", "ips", "list", "--json"]).stdout()
+
+    @function
     def flyctl(self, version: str = "latest") -> dagger.File:
         """
         Returns the flyctl file from Fly.io
