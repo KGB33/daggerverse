@@ -37,9 +37,9 @@ class Flyio:
         )
 
     @function
-    async def launch(self, fly_toml: dagger.File) -> str:
+    async def deploy(self, fly_toml: dagger.File) -> str:
         """
-        Launches the provided fly.toml.
+        deployes the provided fly.toml.
         """
         return await (
             self.base()
@@ -47,7 +47,7 @@ class Flyio:
             .with_exec(
                 [
                     "flyctl",
-                    "launch",
+                    "deploy",
                     "--copy-config",
                     "--auto-confirm",
                     "--ha=false",
