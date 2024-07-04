@@ -19,6 +19,7 @@ jobs:
       - name: Publish to GHCR
         uses: dagger/dagger-for-github@v5
         with:
+          workdir: runtime_containers
           verb: call 
           args: "publish --ghcr-token env:GH_TOKEN"
           version: "0.11.8"
