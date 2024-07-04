@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - runtime_containers/
+      - runtime_containers/**
 
 permissions:
   packages: write
