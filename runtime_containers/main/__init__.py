@@ -10,14 +10,14 @@ from dagger import dag, function, object_type
 @object_type
 class RuntimeContainers:
     @function
-    async def publish(self, ghcr_token: dagger.Secret):
+    async def publish(self, ghcr_token: dagger.Secret) -> str:
         """
         Publishes all containers to GHCR.
         """
         ctrs = [
             self.python_pulumi,
         ]
-        with asyncio.TaskGroup() as tg:
+        async with asyncio.TaskGroup() as tg:
             tasks = [
                 tg.create_task(
                     ctr()
