@@ -1,0 +1,27 @@
+name: Build & Publish Runtime Containers.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - runtime_containers/
+
+permissions:
+  packages: write
+  actions: write
+jobs:
+  publish:
+    name: "Build & Push to GHCR"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Publish to GHCR
+        uses: dagger/dagger-for-github@v5
+        with:
+          verb: call 
+          args: "publish --ghcr-token env:GH_TOKEN"
+          version: "0.11.8"
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
